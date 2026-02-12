@@ -1,9 +1,12 @@
 # Demo script to show it works
+from src.db_loader import load_data_from_db
 from src.data_processor import DataProcessor
 
-# Test with sample data
-processor = DataProcessor('sample_meal_data.csv')
-df = processor.load_data()
+df = load_data_from_db()
+processor = DataProcessor(df=df)
+
+df = processor.calculate_metrics()
+
 print("✅ Data loaded successfully!")
 print(f"Records: {len(df)}")
 
