@@ -1,5 +1,6 @@
 """
 Page 4: Dashboard - Complete Analytics View
+Theme-compatible (light + dark mode)
 """
 
 import streamlit as st
@@ -7,46 +8,37 @@ import sys
 from pathlib import Path
 import pandas as pd
 
-# Add parent directory to path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from src.visualizations import Visualizer
 from src.auth import is_logged_in, get_current_user, logout
 
-# ========================================
-# AUTHENTICATION CHECK
-# ========================================
+# ── AUTH CHECK ──
 if not is_logged_in(st.session_state):
     st.error("🔒 Please login first!")
-    if st.button("🔐 Go to Login"):
+    if st.button("🔐 Go to Login", type="primary"):
         st.switch_page("pages/1_login.py")
     st.stop()
 
-# Get current user
 current_user = get_current_user(st.session_state)
 
-# Check if processing is complete
 if 'processing_complete' not in st.session_state or not st.session_state['processing_complete']:
-    st.error("❌ Please process data first!")
-    
+    st.error("❌ No processed data found. Please upload and process data first.")
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("📤 Go to Upload", use_container_width=True):
+        if st.button("📤 Upload Data", use_container_width=True, type="primary"):
             st.switch_page("pages/2_upload_data.py")
     with col2:
-        if st.button("⏳ Go to Processing", use_container_width=True):
+        if st.button("⏳ Processing", use_container_width=True):
             st.switch_page("pages/3_processing.py")
     st.stop()
 
-# Load data from session state
-df = st.session_state['df_processed']
+# Load from session
+df         = st.session_state['df_processed']
 quality_df = st.session_state['quality_df']
-alerts_df = st.session_state['alerts_df']
-stats = st.session_state['stats']
+alerts_df  = st.session_state['alerts_df']
+stats      = st.session_state['stats']
 
-# ========================================
-# PAGE CONFIGURATION
-# ========================================
 st.set_page_config(
     page_title="Dashboard - School Meal Monitor",
     page_icon="📊",
@@ -54,330 +46,461 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ========================================
-# CUSTOM CSS
-# ========================================
+# ── THEME-COMPATIBLE CSS ──
 st.markdown("""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-    
-    * {
-        font-family: 'Inter', sans-serif;
-    }
-    
-    .main {
-        padding: 0rem 1rem;
-        background-color: #f8fafc;
-    }
-    
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    
-    h1 {
-        color: #1e293b;
-        font-weight: 800;
-        text-align: center;
-        padding: 1rem 0;
-        font-size: 2.5rem;
-    }
-    
-    h2 {
-        color: #334155;
-        font-weight: 700;
-        border-left: 5px solid #3b82f6;
-        padding-left: 1rem;
-        margin-top: 2rem;
-        font-size: 1.8rem;
-    }
-    
-    .stSuccess {
-        background-color: #d1fae5;
-        border-left: 5px solid #10b981;
-        padding: 1rem;
-        border-radius: 10px;
-        color: #065f46;
-    }
-    
-    .stWarning {
-        background-color: #fef3c7;
-        border-left: 5px solid #f59e0b;
-        padding: 1rem;
-        border-radius: 10px;
-        color: #92400e;
-    }
-    
-    .stError {
-        background-color: #fee2e2;
-        border-left: 5px solid #ef4444;
-        padding: 1rem;
-        border-radius: 10px;
-        color: #991b1b;
-    }
-    </style>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap');
+
+* { font-family: 'DM Sans', sans-serif; }
+
+/* ── HIDE CHROME ── */
+#MainMenu, footer { visibility: hidden; }
+
+/* ─────────────────────────────────────────
+   THEME-SAFE CSS VARIABLES
+   Works in both light mode and dark mode
+───────────────────────────────────────── */
+:root {
+    --blue-start:   #2563eb;
+    --blue-end:     #1d4ed8;
+    --purple-start: #7c3aed;
+    --purple-end:   #6d28d9;
+    --pink-start:   #db2777;
+    --pink-end:     #be185d;
+    --teal-start:   #0891b2;
+    --teal-end:     #0e7490;
+
+    --green-bg:   rgba(22,163,74,0.12);
+    --green-bdr:  #16a34a;
+    --green-text: #16a34a;
+
+    --amber-bg:   rgba(217,119,6,0.12);
+    --amber-bdr:  #d97706;
+    --amber-text: #d97706;
+
+    --red-bg:     rgba(220,38,38,0.12);
+    --red-bdr:    #dc2626;
+    --red-text:   #dc2626;
+
+    --indigo-bg:  rgba(99,102,241,0.12);
+    --indigo-bdr: #6366f1;
+    --indigo-text:#6366f1;
+
+    --blue-bg:    rgba(37,99,235,0.10);
+    --blue-bdr:   #2563eb;
+    --blue-text:  #2563eb;
+
+    --card-radius: 16px;
+    --card-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+/* ── KPI METRIC CARDS ── */
+.kpi-card {
+    padding: 1.8rem 1.5rem;
+    border-radius: var(--card-radius);
+    color: #ffffff;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 0.5rem;
+}
+.kpi-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    opacity: 0.88;
+    margin: 0 0 0.6rem;
+    text-transform: uppercase;
+}
+.kpi-value {
+    font-size: 2.8rem;
+    font-weight: 800;
+    line-height: 1;
+    margin: 0;
+    color: #ffffff;
+}
+.kpi-sub {
+    font-size: 0.8rem;
+    opacity: 0.75;
+    margin: 0.4rem 0 0;
+}
+
+.kpi-blue   { background: linear-gradient(135deg, #2563eb, #1d4ed8); box-shadow: 0 8px 24px rgba(37,99,235,0.30); }
+.kpi-pink   { background: linear-gradient(135deg, #db2777, #be185d); box-shadow: 0 8px 24px rgba(219,39,119,0.30); }
+.kpi-teal   { background: linear-gradient(135deg, #0891b2, #0e7490); box-shadow: 0 8px 24px rgba(8,145,178,0.30); }
+.kpi-amber  { background: linear-gradient(135deg, #d97706, #b45309); box-shadow: 0 8px 24px rgba(217,119,6,0.30); }
+.kpi-red    { background: linear-gradient(135deg, #dc2626, #b91c1c); box-shadow: 0 8px 24px rgba(220,38,38,0.30); }
+
+/* ── COMPLIANCE CARDS ── */
+.compliance-card {
+    padding: 1.8rem;
+    border-radius: var(--card-radius);
+    border-left: 5px solid;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 0.5rem;
+    /* no background set = inherits theme bg */
+}
+.compliance-card.green  { border-color: var(--green-bdr);  background: var(--green-bg);  }
+.compliance-card.amber  { border-color: var(--amber-bdr);  background: var(--amber-bg);  }
+.compliance-card.blue   { border-color: var(--blue-bdr);   background: var(--blue-bg);   }
+
+.compliance-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin: 0 0 0.5rem;
+}
+.compliance-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0 0 0.4rem;
+    line-height: 1;
+}
+.compliance-card.green  .compliance-value { color: var(--green-text); }
+.compliance-card.amber  .compliance-value { color: var(--amber-text); }
+.compliance-card.blue   .compliance-value { color: var(--blue-text);  }
+.compliance-status { font-size: 0.85rem; font-weight: 600; opacity: 0.8; margin: 0; }
+
+/* ── ALERT CARDS ── */
+.alert-stat-card {
+    padding: 1.5rem;
+    border-radius: var(--card-radius);
+    border-left: 5px solid;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 0.5rem;
+}
+.alert-stat-card.red    { background: var(--red-bg);    border-color: var(--red-bdr);    }
+.alert-stat-card.amber  { background: var(--amber-bg);  border-color: var(--amber-bdr);  }
+.alert-stat-card.indigo { background: var(--indigo-bg); border-color: var(--indigo-bdr); }
+
+.alert-stat-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin: 0 0 0.4rem;
+}
+.alert-stat-value {
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin: 0 0 0.3rem;
+    line-height: 1;
+}
+.alert-stat-card.red    .alert-stat-value { color: var(--red-text);    }
+.alert-stat-card.amber  .alert-stat-value { color: var(--amber-text);  }
+.alert-stat-card.indigo .alert-stat-value { color: var(--indigo-text); }
+.alert-stat-desc { font-size: 0.85rem; opacity: 0.7; margin: 0; font-weight: 500; }
+
+/* ── ALERT DETAIL CARDS ── */
+.alert-detail {
+    padding: 1.2rem 1.5rem;
+    border-radius: 12px;
+    border-left: 4px solid;
+    margin-bottom: 0.8rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.alert-detail.red   { background: var(--red-bg);   border-color: var(--red-bdr);   }
+.alert-detail.amber { background: var(--amber-bg); border-color: var(--amber-bdr); }
+.alert-school { font-size: 0.95rem; font-weight: 700; margin: 0 0 0.5rem; }
+
+/* ── SECTION HEADER ── */
+.section-header {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    font-weight: 400;
+    margin: 2rem 0 1rem;
+    padding-left: 1rem;
+    border-left: 4px solid #2563eb;
+}
+
+/* ── DASHBOARD HERO ── */
+.dash-hero {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 60%, #3b82f6 100%);
+    border-radius: 20px;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 12px 40px rgba(37,99,235,0.3);
+}
+.dash-hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.2rem;
+    font-weight: 400;
+    color: white;
+    margin: 0 0 0.4rem;
+}
+.dash-hero p {
+    opacity: 0.85;
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* ── RECORD COUNT BADGE ── */
+.record-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: rgba(37,99,235,0.12);
+    color: #2563eb;
+    margin: 0.8rem 0 0;
+    border: 1px solid rgba(37,99,235,0.2);
+}
+
+/* ── BUTTONS ── */
+.stButton > button {
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+}
+.stDownloadButton > button {
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+}
+
+/* ── TABS ── */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 6px;
+    background: transparent;
+}
+.stTabs [data-baseweb="tab"] {
+    border-radius: 10px 10px 0 0;
+    padding: 10px 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.stTabs [aria-selected="true"] {
+    background: #2563eb !important;
+    color: white !important;
+}
+
+/* ── SIDEBAR USER CARD ── */
+.sidebar-user {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    padding: 1.3rem;
+    border-radius: 14px;
+    color: white;
+    margin-bottom: 1.5rem;
+}
+.sidebar-user h4 { color: white; margin: 0 0 0.3rem; font-size: 1rem; }
+.sidebar-user p  { color: rgba(255,255,255,0.8); margin: 0; font-size: 0.82rem; }
+
+/* ── EXPANDER ── */
+.streamlit-expanderHeader {
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+}
+
+/* ── SUCCESS TOAST ── */
+.no-alert-box {
+    background: var(--green-bg);
+    border: 1px solid var(--green-bdr);
+    border-radius: 14px;
+    padding: 1.5rem 2rem;
+    text-align: center;
+    color: var(--green-text);
+    font-weight: 600;
+    font-size: 1.05rem;
+}
+</style>
 """, unsafe_allow_html=True)
 
-# ========================================
-# SIDEBAR
-# ========================================
+# ── SIDEBAR ──
 with st.sidebar:
     st.markdown(f"""
-        <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                    padding: 1.5rem; border-radius: 15px; color: white; margin-bottom: 2rem;'>
-            <h3 style='margin: 0; color: white;'>👤 {current_user['full_name']}</h3>
-            <p style='margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 0.9rem;'>
-                Role: {current_user['role']}
-            </p>
+        <div class="sidebar-user">
+            <h4>👤 {current_user['full_name']}</h4>
+            <p>Role: {current_user['role']}</p>
         </div>
     """, unsafe_allow_html=True)
-    
+
     if st.button("🚪 Logout", use_container_width=True):
         logout(st.session_state)
-        st.success("Logged out!")
         st.switch_page("pages/1_login.py")
-    
+
     st.markdown("---")
-    
-    st.markdown("### 📍 Current Page")
-    st.success("**Dashboard**")
-    
-    st.markdown("### 🔄 Navigation")
+    st.markdown("**📍 Current Page**")
+    st.success("Dashboard ✅")
+
+    st.markdown("**🔄 Navigation**")
     if st.button("🏠 Home", use_container_width=True):
         st.switch_page("app.py")
     if st.button("📤 Upload New Data", use_container_width=True):
-        # Clear session state
-        for key in ['data_loaded', 'processing_complete', 'meal_data', 'df_processed', 'quality_df', 'alerts_df', 'stats']:
-            if key in st.session_state:
-                del st.session_state[key]
+        for key in ['data_loaded','processing_complete','meal_data','df_processed','quality_df','alerts_df','stats']:
+            st.session_state.pop(key, None)
         st.switch_page("pages/2_upload_data.py")
-    
-    st.markdown("---")
-    
-    st.markdown(f"""
-        <div style='background-color: #f3f4f6; padding: 1rem; border-radius: 10px;'>
-            <h3 style='margin: 0 0 0.5rem 0;'>📊 Data Summary</h3>
-            <p style='margin: 0;'>Records: {len(df)}</p>
-            <p style='margin: 0;'>Schools: {stats['total_schools']}</p>
-            <p style='margin: 0;'>Alerts: {len(alerts_df)}</p>
-            <p style='margin: 0;'>Source: {st.session_state.get('data_source', 'Unknown')}</p>
-        </div>
-    """, unsafe_allow_html=True)
 
-# ========================================
-# HEADER
-# ========================================
-st.markdown("""
-    <div style='text-align: center; padding: 2rem 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                border-radius: 20px; margin-bottom: 2rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1);'>
-        <h1 style='color: white; margin: 0; font-size: 3rem;'>📊 Quality Assessment Dashboard</h1>
-        <p style='color: rgba(255,255,255,0.9); font-size: 1.2rem; margin: 0.5rem 0 0 0;'>
-            Real-time Analytics & Insights
-        </p>
+    st.markdown("---")
+    st.markdown(f"""
+        **📊 Session Summary**
+        - Records: **{len(df)}**
+        - Schools: **{stats['total_schools']}**
+        - Alerts: **{len(alerts_df)}**
+        - Source: **{st.session_state.get('data_source','Unknown').upper()}**
+    """)
+
+# ── HERO HEADER ──
+st.markdown(f"""
+    <div class="dash-hero">
+        <h1>📊 Quality Assessment Dashboard</h1>
+        <p>AI-powered insights · Real-time analytics · MySQL integrated</p>
+        <span class="record-badge">
+            {len(df)} records · {stats['total_schools']} schools · {len(alerts_df)} alerts
+        </span>
     </div>
 """, unsafe_allow_html=True)
 
-# ========================================
-# KPI SECTION
-# ========================================
-st.markdown("## 📊 Key Performance Indicators")
+# ── KPI CARDS ──
+st.markdown('<p class="section-header">Key Performance Indicators</p>', unsafe_allow_html=True)
+
+k1, k2, k3, k4 = st.columns(4)
+
+with k1:
+    st.markdown(f"""
+        <div class="kpi-card kpi-blue">
+            <p class="kpi-label">🏫 Total Schools</p>
+            <p class="kpi-value">{stats['total_schools']}</p>
+            <p class="kpi-sub">in dataset</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+with k2:
+    st.markdown(f"""
+        <div class="kpi-card kpi-pink">
+            <p class="kpi-label">🍽️ Meals Served</p>
+            <p class="kpi-value">{stats['total_meals_served']:,}</p>
+            <p class="kpi-sub">total across all schools</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+with k3:
+    waste_cls = "kpi-red" if stats['avg_waste'] > 20 else "kpi-teal"
+    waste_sub = "⚠️ Above threshold" if stats['avg_waste'] > 20 else "✅ Within range"
+    st.markdown(f"""
+        <div class="kpi-card {waste_cls}">
+            <p class="kpi-label">🗑️ Avg Waste</p>
+            <p class="kpi-value">{stats['avg_waste']:.1f}%</p>
+            <p class="kpi-sub">{waste_sub}</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+with k4:
+    taste_sub = "⭐" * round(stats['avg_taste_rating'])
+    st.markdown(f"""
+        <div class="kpi-card kpi-amber">
+            <p class="kpi-label">⭐ Avg Taste</p>
+            <p class="kpi-value">{stats['avg_taste_rating']:.1f}</p>
+            <p class="kpi-sub">{taste_sub} out of 5</p>
+        </div>
+    """, unsafe_allow_html=True)
+
 st.markdown("<br>", unsafe_allow_html=True)
 
-col1, col2, col3, col4 = st.columns(4)
+# ── NUTRITION COMPLIANCE ──
+st.markdown('<p class="section-header">Nutritional Compliance</p>', unsafe_allow_html=True)
 
-with col1:
+n1, n2, n3 = st.columns(3)
+
+with n1:
+    cal_ok = stats['avg_calorie_compliance'] >= 95
     st.markdown(f"""
-        <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                    padding: 2rem 1.5rem; border-radius: 20px; color: white; 
-                    box-shadow: 0 10px 20px rgba(102,126,234,0.3);'>
-            <p style='margin: 0; font-size: 0.9rem; opacity: 0.9; font-weight: 600;'>🏫 TOTAL SCHOOLS</p>
-            <h1 style='margin: 0.5rem 0 0 0; color: white; font-size: 3rem;'>{stats['total_schools']}</h1>
+        <div class="compliance-card green">
+            <p class="compliance-label">Calorie Compliance</p>
+            <p class="compliance-value">{stats['avg_calorie_compliance']:.1f}%</p>
+            <p class="compliance-status">{'✅ On Target' if cal_ok else '⚠️ Below Target'}</p>
         </div>
     """, unsafe_allow_html=True)
 
-with col2:
+with n2:
+    prot_ok = stats['avg_protein_compliance'] >= 95
     st.markdown(f"""
-        <div style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); 
-                    padding: 2rem 1.5rem; border-radius: 20px; color: white; 
-                    box-shadow: 0 10px 20px rgba(240,147,251,0.3);'>
-            <p style='margin: 0; font-size: 0.9rem; opacity: 0.9; font-weight: 600;'>🍽️ MEALS SERVED</p>
-            <h1 style='margin: 0.5rem 0 0 0; color: white; font-size: 3rem;'>{stats['total_meals_served']:,}</h1>
+        <div class="compliance-card amber">
+            <p class="compliance-label">Protein Compliance</p>
+            <p class="compliance-value">{stats['avg_protein_compliance']:.1f}%</p>
+            <p class="compliance-status">{'✅ On Target' if prot_ok else '⚠️ Below Target'}</p>
         </div>
     """, unsafe_allow_html=True)
 
-with col3:
-    waste_gradient = "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)" if stats['avg_waste'] > 20 else "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
-    st.markdown(f"""
-        <div style='background: {waste_gradient}; 
-                    padding: 2rem 1.5rem; border-radius: 20px; color: white; 
-                    box-shadow: 0 10px 20px rgba(79,172,254,0.3);'>
-            <p style='margin: 0; font-size: 0.9rem; opacity: 0.9; font-weight: 600;'>🗑️ AVG WASTE</p>
-            <h1 style='margin: 0.5rem 0 0 0; color: white; font-size: 3rem;'>{stats['avg_waste']:.1f}%</h1>
-        </div>
-    """, unsafe_allow_html=True)
-
-with col4:
-    st.markdown(f"""
-        <div style='background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); 
-                    padding: 2rem 1.5rem; border-radius: 20px; color: white; 
-                    box-shadow: 0 10px 20px rgba(250,112,154,0.3);'>
-            <p style='margin: 0; font-size: 0.9rem; opacity: 0.9; font-weight: 600;'>⭐ AVG TASTE</p>
-            <h1 style='margin: 0.5rem 0 0 0; color: white; font-size: 3rem;'>{stats['avg_taste_rating']:.1f}</h1>
-            <p style='margin: 0; font-size: 0.8rem; opacity: 0.8;'>out of 5.0</p>
-        </div>
-    """, unsafe_allow_html=True)
-
-st.markdown("<br><br>", unsafe_allow_html=True)
-
-# ========================================
-# NUTRITION OVERVIEW
-# ========================================
-st.markdown("## 🎯 Nutritional Compliance Overview")
-st.markdown("<br>", unsafe_allow_html=True)
-
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    cal_status = "✅ On Target" if stats['avg_calorie_compliance'] >= 95 else "⚠️ Below Target"
-    st.markdown(f"""
-        <div style='background-color: #ecfdf5; padding: 2rem; 
-                    border-radius: 15px; border-left: 6px solid #10b981;
-                    box-shadow: 0 4px 6px rgba(0,0,0,0.05);'>
-            <h4 style='color: #065f46; margin: 0; font-size: 0.9rem; font-weight: 700;'>
-                CALORIE COMPLIANCE
-            </h4>
-            <h1 style='color: #047857; margin: 1rem 0; font-size: 3rem;'>{stats['avg_calorie_compliance']:.1f}%</h1>
-            <p style='color: #059669; margin: 0; font-weight: 600;'>{cal_status}</p>
-        </div>
-    """, unsafe_allow_html=True)
-
-with col2:
-    prot_status = "✅ On Target" if stats['avg_protein_compliance'] >= 95 else "⚠️ Below Target"
-    st.markdown(f"""
-        <div style='background-color: #fef3c7; padding: 2rem; 
-                    border-radius: 15px; border-left: 6px solid #f59e0b;
-                    box-shadow: 0 4px 6px rgba(0,0,0,0.05);'>
-            <h4 style='color: #92400e; margin: 0; font-size: 0.9rem; font-weight: 700;'>
-                PROTEIN COMPLIANCE
-            </h4>
-            <h1 style='color: #d97706; margin: 1rem 0; font-size: 3rem;'>{stats['avg_protein_compliance']:.1f}%</h1>
-            <p style='color: #b45309; margin: 0; font-weight: 600;'>{prot_status}</p>
-        </div>
-    """, unsafe_allow_html=True)
-
-with col3:
+with n3:
     excellent_count = len(quality_df[quality_df['Overall_Quality_Score'] >= 85])
-    excellence_rate = (excellent_count / stats['total_schools']) * 100 if stats['total_schools'] > 0 else 0
+    ex_rate = (excellent_count / stats['total_schools'] * 100) if stats['total_schools'] else 0
     st.markdown(f"""
-        <div style='background-color: #dbeafe; padding: 2rem; 
-                    border-radius: 15px; border-left: 6px solid #3b82f6;
-                    box-shadow: 0 4px 6px rgba(0,0,0,0.05);'>
-            <h4 style='color: #1e3a8a; margin: 0; font-size: 0.9rem; font-weight: 700;'>
-                EXCELLENT SCHOOLS
-            </h4>
-            <h1 style='color: #2563eb; margin: 1rem 0; font-size: 3rem;'>{excellent_count}</h1>
-            <p style='color: #1d4ed8; margin: 0; font-weight: 600;'>{excellence_rate:.0f}% of total</p>
+        <div class="compliance-card blue">
+            <p class="compliance-label">Excellent Schools</p>
+            <p class="compliance-value">{excellent_count}</p>
+            <p class="compliance-status">{ex_rate:.0f}% of all schools</p>
         </div>
     """, unsafe_allow_html=True)
 
-st.markdown("<br><br>", unsafe_allow_html=True)
-st.markdown("---")
-
-# ========================================
-# ALERTS SECTION
-# ========================================
-st.markdown("## 🚨 AI-Generated Quality Alerts")
 st.markdown("<br>", unsafe_allow_html=True)
+st.divider()
+
+# ── ALERTS ──
+st.markdown('<p class="section-header">AI-Generated Quality Alerts</p>', unsafe_allow_html=True)
 
 if not alerts_df.empty:
-    high_priority = len(alerts_df[alerts_df['Priority'] == 'High'])
-    medium_priority = len(alerts_df[alerts_df['Priority'] == 'Medium'])
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
+    high   = len(alerts_df[alerts_df['Priority'] == 'High'])
+    medium = len(alerts_df[alerts_df['Priority'] == 'Medium'])
+    total  = len(alerts_df)
+
+    a1, a2, a3 = st.columns(3)
+    with a1:
         st.markdown(f"""
-            <div style='background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); 
-                        padding: 1.5rem; border-radius: 15px; 
-                        border-left: 6px solid #dc2626;
-                        box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
-                <h3 style='color: #991b1b; margin: 0; font-size: 1rem; font-weight: 700;'>
-                    🔴 HIGH PRIORITY
-                </h3>
-                <p style='font-size: 3rem; font-weight: 800; color: #dc2626; margin: 0.5rem 0 0 0;'>
-                    {high_priority}
-                </p>
-                <p style='color: #b91c1c; margin: 0; font-weight: 600;'>schools need urgent attention</p>
+            <div class="alert-stat-card red">
+                <p class="alert-stat-label">🔴 High Priority</p>
+                <p class="alert-stat-value">{high}</p>
+                <p class="alert-stat-desc">schools need urgent attention</p>
             </div>
         """, unsafe_allow_html=True)
-    
-    with col2:
+    with a2:
         st.markdown(f"""
-            <div style='background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); 
-                        padding: 1.5rem; border-radius: 15px; 
-                        border-left: 6px solid #f59e0b;
-                        box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
-                <h3 style='color: #92400e; margin: 0; font-size: 1rem; font-weight: 700;'>
-                    🟡 MEDIUM PRIORITY
-                </h3>
-                <p style='font-size: 3rem; font-weight: 800; color: #f59e0b; margin: 0.5rem 0 0 0;'>
-                    {medium_priority}
-                </p>
-                <p style='color: #b45309; margin: 0; font-weight: 600;'>schools need monitoring</p>
+            <div class="alert-stat-card amber">
+                <p class="alert-stat-label">🟡 Medium Priority</p>
+                <p class="alert-stat-value">{medium}</p>
+                <p class="alert-stat-desc">schools need monitoring</p>
             </div>
         """, unsafe_allow_html=True)
-    
-    with col3:
-        total_alerts = len(alerts_df)
+    with a3:
         st.markdown(f"""
-            <div style='background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); 
-                        padding: 1.5rem; border-radius: 15px; 
-                        border-left: 6px solid #6366f1;
-                        box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
-                <h3 style='color: #3730a3; margin: 0; font-size: 1rem; font-weight: 700;'>
-                    📊 TOTAL ALERTS
-                </h3>
-                <p style='font-size: 3rem; font-weight: 800; color: #6366f1; margin: 0.5rem 0 0 0;'>
-                    {total_alerts}
-                </p>
-                <p style='color: #4f46e5; margin: 0; font-weight: 600;'>issues detected</p>
+            <div class="alert-stat-card indigo">
+                <p class="alert-stat-label">📊 Total Alerts</p>
+                <p class="alert-stat-value">{total}</p>
+                <p class="alert-stat-desc">issues detected</p>
             </div>
         """, unsafe_allow_html=True)
-    
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    
-    # Alert Details
-    with st.expander(f"📋 View All {len(alerts_df)} Alert Details", expanded=False):
-        for idx, alert in alerts_df.head(15).iterrows():
-            priority_color = "#dc2626" if alert['Priority'] == 'High' else "#f59e0b"
-            priority_bg = "#fee2e2" if alert['Priority'] == 'High' else "#fef3c7"
-            priority_emoji = "🔴" if alert['Priority'] == 'High' else "🟡"
-            
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    with st.expander(f"📋 View All {total} Alert Details", expanded=False):
+        for _, alert in alerts_df.head(20).iterrows():
+            is_high   = alert['Priority'] == 'High'
+            card_cls  = 'red' if is_high else 'amber'
+            emoji     = '🔴' if is_high else '🟡'
             st.markdown(f"""
-                <div style='background-color: {priority_bg}; padding: 1.5rem; 
-                            margin-bottom: 1rem; border-radius: 12px;
-                            border-left: 5px solid {priority_color};
-                            box-shadow: 0 2px 4px rgba(0,0,0,0.05);'>
-                    <h4 style='margin: 0 0 0.5rem 0; color: #374151; font-weight: 700;'>
-                        {priority_emoji} School: <span style='color: {priority_color};'>{alert['School_ID']}</span> 
-                        | Date: {alert['Date']} | Priority: <span style='color: {priority_color};'>{alert['Priority']}</span>
-                    </h4>
+                <div class="alert-detail {card_cls}">
+                    <p class="alert-school">
+                        {emoji} School: <strong>{alert['School_ID']}</strong>
+                        &nbsp;·&nbsp; Date: {alert['Date']}
+                        &nbsp;·&nbsp; Priority: <strong>{alert['Priority']}</strong>
+                    </p>
             """, unsafe_allow_html=True)
-            
-            st.markdown("**Issues Detected:**")
             for issue in alert['Alerts']:
                 st.write(f"  ⚠️ {issue}")
-            
             st.markdown("</div>", unsafe_allow_html=True)
 else:
-    st.success("✅ No Critical Alerts - All Schools Performing Well!")
+    st.markdown("""
+        <div class="no-alert-box">
+            ✅ &nbsp; No Critical Alerts — All Schools Performing Well!
+        </div>
+    """, unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("---")
+st.divider()
 
-# ========================================
-# VISUALIZATIONS
-# ========================================
-st.markdown("## 📈 Analytics Dashboard")
-st.markdown("<br>", unsafe_allow_html=True)
+# ── VISUALIZATIONS ──
+st.markdown('<p class="section-header">Analytics & Visualizations</p>', unsafe_allow_html=True)
 
 visualizer = Visualizer(df)
 
@@ -385,159 +508,118 @@ tab1, tab2, tab3, tab4 = st.tabs([
     "📉 Waste Trends",
     "🎯 Quality Overview",
     "🏆 School Rankings",
-    "🥗 Nutrition Metrics"
+    "🥗 Nutrition"
 ])
 
 with tab1:
-    st.markdown("### Food Waste Analysis Over Time")
+    st.markdown("##### Food Waste Trend Over Time")
     st.plotly_chart(
         visualizer.plot_waste_trend(),
         use_container_width=True,
         config={'displayModeBar': True, 'displaylogo': False}
     )
-    st.info("💡 **Insight:** Monitor waste trends to identify patterns and implement targeted interventions.")
+    st.info("💡 Monitor trends to identify patterns and implement targeted interventions.")
 
 with tab2:
-    st.markdown("### Quality Distribution & Performance Metrics")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
+    st.markdown("##### Quality Distribution & Radar")
+    c1, c2 = st.columns(2)
+    with c1:
         st.plotly_chart(
             visualizer.plot_quality_distribution(quality_df),
             use_container_width=True,
             config={'displayModeBar': False}
         )
-    
-    with col2:
+    with c2:
         st.plotly_chart(
             visualizer.plot_metrics_radar(quality_df),
             use_container_width=True,
             config={'displayModeBar': False}
         )
-    
-    st.info("💡 **Insight:** The radar chart shows balanced performance across all quality dimensions.")
+    st.info("💡 The radar chart shows performance balance across all five quality dimensions.")
 
 with tab3:
-    st.markdown("### School Performance Comparison")
+    st.markdown("##### School Performance Comparison")
     st.plotly_chart(
         visualizer.plot_school_performance(quality_df),
         use_container_width=True,
         config={'displayModeBar': True, 'displaylogo': False}
     )
-    st.info("💡 **Insight:** Identify top performers and schools needing additional support.")
+    st.info("💡 Identify top performers and schools needing additional support.")
 
 with tab4:
-    st.markdown("### Nutritional Compliance Analysis")
+    st.markdown("##### Nutritional Compliance Analysis")
     st.plotly_chart(
         visualizer.plot_nutrition_compliance(),
         use_container_width=True,
         config={'displayModeBar': True, 'displaylogo': False}
     )
-    st.info("💡 **Insight:** Both calorie and protein compliance should ideally be at or above 100%.")
+    st.info("💡 Both calorie and protein compliance should ideally be at or above 100%.")
 
 st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("---")
+st.divider()
 
-# ========================================
-# DATA TABLE
-# ========================================
-st.markdown("## 📋 Detailed Quality Assessment Data")
-st.markdown("<br>", unsafe_allow_html=True)
+# ── DATA TABLE ──
+st.markdown('<p class="section-header">Detailed Assessment Records</p>', unsafe_allow_html=True)
 
-# Filters
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    min_score = st.slider(
-        "🎯 Minimum Quality Score",
-        min_value=0,
-        max_value=100,
-        value=0,
-        step=5
-    )
-
-with col2:
+f1, f2, f3 = st.columns(3)
+with f1:
+    min_score = st.slider("🎯 Min Quality Score", 0, 100, 0, 5)
+with f2:
     selected_schools = st.multiselect(
-        "🏫 Select Schools",
+        "🏫 Filter Schools",
         options=sorted(quality_df['School_ID'].unique()),
         default=sorted(quality_df['School_ID'].unique())
     )
+with f3:
+    date_range = st.selectbox("📅 Date Range", ["All Dates", "Last 7 Days", "Last 30 Days"])
 
-with col3:
-    date_range = st.selectbox(
-        "📅 Date Range",
-        options=["All Dates", "Last 7 Days", "Last 30 Days"]
-    )
-
-# Apply filters
 filtered_df = quality_df[
     (quality_df['Overall_Quality_Score'] >= min_score) &
     (quality_df['School_ID'].isin(selected_schools))
 ]
 
 st.markdown(f"""
-    <div style='background-color: #f3f4f6; padding: 1rem; border-radius: 10px; margin: 1rem 0;'>
-        <p style='margin: 0; color: #374151; font-weight: 600;'>
-            📊 Showing {len(filtered_df)} of {len(quality_df)} total records
-        </p>
+    <div class="record-badge">
+        Showing {len(filtered_df)} of {len(quality_df)} records
     </div>
+    <br>
 """, unsafe_allow_html=True)
 
-# Display table
-st.dataframe(
-    filtered_df.style.background_gradient(
-        cmap='RdYlGn',
-        subset=['Overall_Quality_Score'],
-        vmin=0,
-        vmax=100
-    ).format({
-        'Overall_Quality_Score': '{:.2f}',
-        'Nutrition_Score': '{:.2f}',
-        'Waste_Score': '{:.2f}',
-        'Hygiene_Score': '{:.2f}',
-        'Taste_Score': '{:.2f}',
-        'Menu_Score': '{:.2f}'
-    }),
-    use_container_width=True,
-    height=450
-)
+# Format columns that exist
+fmt_cols = {c: '{:.2f}' for c in ['Overall_Quality_Score','Nutrition_Score','Waste_Score','Hygiene_Score','Taste_Score','Menu_Score'] if c in filtered_df.columns}
 
-# Download buttons
+try:
+    styled = filtered_df.style.background_gradient(
+        cmap='RdYlGn', subset=['Overall_Quality_Score'], vmin=0, vmax=100
+    ).format(fmt_cols)
+    st.dataframe(styled, use_container_width=True, height=440)
+except Exception:
+    st.dataframe(filtered_df, use_container_width=True, height=440)
+
 st.markdown("<br>", unsafe_allow_html=True)
-col1, col2 = st.columns(2)
 
-with col1:
-    csv = filtered_df.to_csv(index=False).encode('utf-8')
+d1, d2 = st.columns(2)
+with d1:
     st.download_button(
-        label="📥 Download Filtered Data (CSV)",
-        data=csv,
-        file_name=f"quality_report_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.csv",
+        "📥 Download Filtered Data",
+        data=filtered_df.to_csv(index=False).encode('utf-8'),
+        file_name=f"quality_filtered_{pd.Timestamp.now().strftime('%Y%m%d_%H%M')}.csv",
         mime="text/csv",
         use_container_width=True
     )
-
-with col2:
-    csv_full = quality_df.to_csv(index=False).encode('utf-8')
+with d2:
     st.download_button(
-        label="📥 Download All Data (CSV)",
-        data=csv_full,
-        file_name=f"complete_report_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.csv",
+        "📥 Download All Data",
+        data=quality_df.to_csv(index=False).encode('utf-8'),
+        file_name=f"quality_all_{pd.Timestamp.now().strftime('%Y%m%d_%H%M')}.csv",
         mime="text/csv",
         use_container_width=True
     )
 
 st.markdown("<br><br>", unsafe_allow_html=True)
-
-# Footer
-st.markdown("---")
+st.divider()
 st.markdown("""
-    <div style='text-align: center; padding: 2rem 0; color: #64748b;'>
-        <p style='margin: 0; font-size: 0.9rem;'>
-            🍽️ School Meal Quality Monitor | Powered by AI & MySQL
-        </p>
-        <p style='margin: 0.5rem 0 0 0; font-size: 0.85rem;'>
-            Ensuring Quality Nutrition for Every Student
-        </p>
+    <div style='text-align:center; padding: 1rem 0; opacity: 0.55; font-size: 0.85rem;'>
+        🍽️ School Meal Quality Monitor &nbsp;·&nbsp; AI-Powered &nbsp;·&nbsp; MySQL Integrated
     </div>
 """, unsafe_allow_html=True)
