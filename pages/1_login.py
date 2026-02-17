@@ -1,254 +1,296 @@
 """
-Login Page - Authentication Gateway
+Page 1: Login Page
+Clean professional login - no demo credentials shown
 """
 
 import streamlit as st
 import sys
 from pathlib import Path
 
-# Add parent to path
 sys.path.append(str(Path(__file__).parent.parent))
-
 from src.auth import authenticate, is_logged_in
 
-# Page config
 st.set_page_config(
     page_title="Login - School Meal Monitor",
-    page_icon="🔐",
+    page_icon="🍽️",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
-    
-    * {
-        font-family: 'Inter', sans-serif;
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap');
+
+    /* ── THEME-SAFE TOKENS ── */
+    :root {
+        --brand-primary:   #2563eb;
+        --brand-secondary: #1d4ed8;
+        --brand-accent:    #3b82f6;
+        --success:         #16a34a;
+        --error:           #dc2626;
+        --warning:         #d97706;
+
+        /* surfaces adapt to light/dark */
+        --surface:         rgba(255,255,255,0.07);
+        --surface-border:  rgba(100,116,139,0.25);
+        --text-primary:    inherit;
+        --text-muted:      #64748b;
+        --input-bg:        rgba(100,116,139,0.08);
+        --input-border:    rgba(100,116,139,0.3);
+        --input-focus:     #2563eb;
+        --card-shadow:     0 20px 60px rgba(0,0,0,0.12);
     }
-    
-    .main {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+    * { font-family: 'DM Sans', sans-serif; box-sizing: border-box; }
+
+    /* Hide Streamlit chrome */
+    #MainMenu, footer, header { visibility: hidden; }
+    .stDeployButton { display: none; }
+
+    /* Full-page gradient background */
+    .stApp {
+        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 40%, #2563eb 70%, #3b82f6 100%);
+        min-height: 100vh;
+    }
+
+    .main .block-container {
+        padding-top: 5vh;
+        padding-bottom: 2rem;
+        max-width: 440px !important;
+        margin: 0 auto;
+    }
+
+    /* ── CARD ── */
+    .login-card {
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 3rem 2.5rem 2.5rem;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .login-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #2563eb, #3b82f6, #60a5fa);
+    }
+
+    /* ── LOGO AREA ── */
+    .logo-ring {
+        width: 72px;
+        height: 72px;
+        background: linear-gradient(135deg, #2563eb, #3b82f6);
+        border-radius: 20px;
         display: flex;
         align-items: center;
         justify-content: center;
+        font-size: 2rem;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 8px 24px rgba(37,99,235,0.35);
     }
-    
-    /* Hide Streamlit elements */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    
-    .login-container {
-        background: white;
-        padding: 3rem 2.5rem;
-        border-radius: 25px;
-        box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-        max-width: 500px;
-        width: 100%;
-        animation: slideIn 0.5s ease-out;
-    }
-    
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(-30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .login-header {
-        text-align: center;
-        margin-bottom: 2.5rem;
-    }
-    
-    .login-icon {
-        font-size: 5rem;
-        margin-bottom: 1rem;
-        animation: bounce 2s infinite;
-    }
-    
-    @keyframes bounce {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-10px); }
-    }
-    
+
     .login-title {
-        font-size: 2.5rem;
-        font-weight: 900;
-        color: #1e293b;
-        margin-bottom: 0.5rem;
+        font-family: 'DM Serif Display', serif;
+        font-size: 2rem;
+        font-weight: 400;
+        color: #0f172a;
+        text-align: center;
+        margin: 0 0 0.4rem;
+        line-height: 1.2;
     }
-    
+
     .login-subtitle {
         color: #64748b;
-        font-size: 1.1rem;
-        font-weight: 500;
-    }
-    
-    .stButton>button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 12px;
-        padding: 1rem 2rem;
-        font-weight: 700;
-        border: none;
-        width: 100%;
-        font-size: 1.15rem;
-        transition: all 0.3s ease;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    
-    .stButton>button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-    }
-    
-    .stTextInput>div>div>input {
-        border-radius: 12px;
-        border: 2px solid #e2e8f0;
-        padding: 1rem 1.2rem;
-        font-size: 1.05rem;
-        transition: all 0.3s ease;
-    }
-    
-    .stTextInput>div>div>input:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-    }
-    
-    .demo-credentials {
-        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-        padding: 1.5rem;
-        border-radius: 15px;
-        margin-top: 2rem;
-        border-left: 5px solid #3b82f6;
-    }
-    
-    .demo-credentials strong {
-        color: #1e40af;
-        font-size: 1.05rem;
-    }
-    
-    .demo-credentials code {
-        background: white;
-        padding: 0.3rem 0.8rem;
-        border-radius: 6px;
-        color: #667eea;
-        font-weight: 700;
         font-size: 0.95rem;
-    }
-    
-    .back-button {
         text-align: center;
-        margin-top: 1.5rem;
+        margin: 0 0 2.5rem;
+        font-weight: 400;
+    }
+
+    /* ── INPUT LABELS ── */
+    .stTextInput label {
+        color: #374151 !important;
+        font-size: 0.875rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.02em;
+        margin-bottom: 0.4rem;
+    }
+
+    /* ── INPUT FIELDS ── */
+    .stTextInput > div > div > input {
+        background: #f8fafc !important;
+        border: 1.5px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+        padding: 0.85rem 1.1rem !important;
+        font-size: 1rem !important;
+        color: #0f172a !important;
+        transition: all 0.2s ease;
+    }
+
+    .stTextInput > div > div > input:focus {
+        border-color: #2563eb !important;
+        background: #fff !important;
+        box-shadow: 0 0 0 4px rgba(37,99,235,0.12) !important;
+    }
+
+    .stTextInput > div > div > input::placeholder {
+        color: #94a3b8 !important;
+    }
+
+    /* ── PRIMARY BUTTON ── */
+    .stButton > button[kind="primary"],
+    .stFormSubmitButton > button[kind="primary"] {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 12px !important;
+        padding: 0.9rem 2rem !important;
+        font-size: 1rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.03em !important;
+        width: 100%;
+        transition: all 0.25s ease;
+        box-shadow: 0 4px 16px rgba(37,99,235,0.35) !important;
+    }
+
+    .stButton > button[kind="primary"]:hover,
+    .stFormSubmitButton > button[kind="primary"]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(37,99,235,0.45) !important;
+    }
+
+    /* ── SECONDARY BUTTON ── */
+    .stButton > button[kind="secondary"] {
+        background: transparent !important;
+        color: #2563eb !important;
+        border: 1.5px solid #2563eb !important;
+        border-radius: 12px !important;
+        padding: 0.7rem 1.5rem !important;
+        font-weight: 600 !important;
+        width: 100%;
+        transition: all 0.2s ease;
+    }
+
+    .stButton > button[kind="secondary"]:hover {
+        background: rgba(37,99,235,0.06) !important;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin: 1.5rem 0;
+        color: #94a3b8;
+        font-size: 0.85rem;
+    }
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #e2e8f0;
+    }
+
+    /* ── ALERT MESSAGES ── */
+    .stAlert {
+        border-radius: 12px !important;
+        border: none !important;
+    }
+
+    /* ── FOOTER TEXT ── */
+    .footer-text {
+        text-align: center;
+        color: rgba(255,255,255,0.7);
+        font-size: 0.85rem;
+        margin-top: 2rem;
+        padding-bottom: 2rem;
+    }
+
+    /* ── SPINNER ── */
+    .stSpinner > div {
+        border-top-color: #2563eb !important;
+    }
+
+    /* ── FORM ── */
+    [data-testid="stForm"] {
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# Check if already logged in
+# Already logged in check
 if is_logged_in(st.session_state):
     st.success("✅ You are already logged in!")
-    st.info("Redirecting to upload page...")
-    
-    if st.button("📤 Go to Upload Page", use_container_width=True):
+    if st.button("Go to Upload →", type="primary", use_container_width=True):
         st.switch_page("pages/2_upload_data.py")
-    
     st.stop()
 
-# Login Container
-st.markdown('<div class="login-container">', unsafe_allow_html=True)
-
-# Header
+# ── CARD ──
 st.markdown("""
-    <div class="login-header">
-        <div class="login-icon">🔐</div>
-        <div class="login-title">Welcome Back</div>
-        <div class="login-subtitle">Login to access School Meal Quality Monitor</div>
+    <div class="login-card">
+        <div class="logo-ring">🍽️</div>
+        <h1 class="login-title">Welcome back</h1>
+        <p class="login-subtitle">Sign in to School Meal Quality Monitor</p>
     </div>
 """, unsafe_allow_html=True)
 
-# Login Form
+# ── LOGIN FORM ──
 with st.form("login_form", clear_on_submit=False):
     username = st.text_input(
-        "👤 Username",
+        "Username",
         placeholder="Enter your username",
-        help="Use 'admin' for demo access"
     )
-    
+
     password = st.text_input(
-        "🔑 Password",
+        "Password",
         type="password",
         placeholder="Enter your password",
-        help="Use 'admin123' for demo access"
     )
-    
+
     st.markdown("<br>", unsafe_allow_html=True)
-    
-    col1, col2 = st.columns([3, 1])
-    
-    with col1:
-        submit = st.form_submit_button("🚀 Login", use_container_width=True, type="primary")
-    
-    with col2:
-        clear = st.form_submit_button("🔄 Clear", use_container_width=True)
-    
+
+    submit = st.form_submit_button(
+        "Sign In →",
+        use_container_width=True,
+        type="primary"
+    )
+
     if submit:
-        if not username or not password:
-            st.error("❌ Please enter both username and password")
+        if not username.strip() or not password.strip():
+            st.error("⚠️  Please enter both username and password.")
         else:
-            with st.spinner("🔄 Authenticating..."):
-                success, result = authenticate(username, password)
-                
+            with st.spinner("Verifying credentials..."):
+                import time
+                success, result = authenticate(username.strip(), password)
+
                 if success:
-                    # Store in session
                     st.session_state['logged_in'] = True
                     st.session_state['user_info'] = result
-                    st.session_state['username'] = username
-                    
-                    st.success(f"✅ Welcome, {result['full_name']}!")
-                    st.balloons()
-                    
-                    # Small delay for effect
-                    import time
-                    time.sleep(1)
-                    
-                    # Redirect
+                    st.session_state['username'] = username.strip()
+
+                    st.success(f"Welcome, {result['full_name']}! Redirecting...")
+                    time.sleep(0.8)
                     st.switch_page("pages/2_upload_data.py")
                 else:
-                    st.error(f"❌ {result}")
-                    st.warning("💡 Hint: Use 'admin' / 'admin123' for demo")
+                    st.error("❌  Invalid username or password. Please try again.")
 
-# Demo Credentials Box
-st.markdown("""
-    <div class="demo-credentials">
-        <strong>📝 Demo Login Credentials</strong><br><br>
-        <strong>Username:</strong> <code>admin</code><br>
-        <strong>Password:</strong> <code>admin123</code><br><br>
-        <em style="color: #64748b; font-size: 0.9rem;">
-            💡 Use these credentials to explore the system
-        </em>
-    </div>
-""", unsafe_allow_html=True)
+# ── DIVIDER ──
+st.markdown('<div class="divider">or</div>', unsafe_allow_html=True)
 
-# Back to Home Button
-st.markdown('<div class="back-button">', unsafe_allow_html=True)
+# ── BACK TO HOME ──
 if st.button("← Back to Home", use_container_width=True):
     st.switch_page("app.py")
-st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown('</div>', unsafe_allow_html=True)
-
-# Footer
+# ── FOOTER ──
 st.markdown("""
-    <div style='text-align: center; color: white; padding: 2rem; margin-top: 2rem;'>
-        <p style='margin: 0; opacity: 0.9;'>
-            🍽️ School Meal Quality Monitor | Powered by AI
-        </p>
+    <div class="footer-text">
+        🍽️ School Meal Quality Monitor &nbsp;·&nbsp; AI-Powered Assessment
     </div>
 """, unsafe_allow_html=True)
