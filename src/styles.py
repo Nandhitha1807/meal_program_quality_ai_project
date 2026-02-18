@@ -915,11 +915,20 @@ SHARED_CSS = """
 /* ─── GLOBAL RESET ─── */
 *, *::before, *::after { box-sizing: border-box; }
 
-/* Apply font only to text elements — NOT * which breaks Streamlit icon SVGs */
-body, p, h1, h2, h3, h4, h5, h6, span, div, button, input, label,
-.stMarkdown, .stText, .element-container,
+/* Apply font ONLY to safe text containers — never to SVG/icon internals */
+body, 
+.stMarkdown, 
+.stMarkdown p, 
+.stMarkdown h1, .stMarkdown h2, .stMarkdown h3, 
+.stMarkdown h4, .stMarkdown h5, .stMarkdown h6,
+.stMarkdown span:not([class*="icon"]):not([class*="arrow"]),
+.stButton button,
+.stTextInput label,
+.stTextInput input,
+.stSelectbox label,
+.stMultiSelect label,
 [data-testid="stMarkdownContainer"],
-[data-testid="stText"] {
+section[data-testid="stSidebar"] {
     font-family: 'Outfit', sans-serif !important;
 }
 
@@ -1041,17 +1050,11 @@ body, p, h1, h2, h3, h4, h5, h6, span, div, button, input, label,
 }
 
 /* ─── EXPANDER ─── */
-/* Use data-testid to target safely — avoids Streamlit internal SVG conflicts */
-details[data-testid="stExpander"] {
+/* Only style container — do NOT touch .streamlit-expanderHeader internals */
+[data-testid="stExpander"] {
     border: 1px solid var(--bdr) !important;
     border-radius: var(--r1) !important;
-    overflow: hidden;
-}
-details[data-testid="stExpander"] summary {
-    font-weight: 600 !important;
-    font-size: 0.9rem !important;
     background: var(--surf) !important;
-    padding: 0.75rem 1rem !important;
 }
 
 /* ─── FORM ─── */
