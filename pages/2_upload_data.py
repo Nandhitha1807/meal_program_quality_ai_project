@@ -1,6 +1,5 @@
-# 0
-"""
-pages/2_upload_data.py — Upload Page
+
+"""pages/2_upload_data.py — Upload Page
 CSV upload ONLY. No MySQL load option. Clean, aligned layout.
 """
 import streamlit as st, pandas as pd, sys, time
