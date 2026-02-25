@@ -141,7 +141,7 @@ with right:
     </div>
     """, unsafe_allow_html=True)
 
-# ── TEMPLATE SECTION ──
+
 st.markdown('<div class="sec-div"><div class="dl"></div><span>CSV Template</span><div class="dl"></div></div>', unsafe_allow_html=True)
 
 tl, tr = st.columns([3, 1], gap="large")
