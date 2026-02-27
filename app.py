@@ -1,5 +1,9 @@
 
-
+"""
+app.py — Landing Page
+Follows device light/dark theme. No forced background.
+Cohesive branded hero sections with transparent feature cards.
+"""
 import streamlit as st, sys
 from pathlib import Path
 
