@@ -20,7 +20,7 @@ st.set_page_config(
 
 st.markdown(SHARED_CSS, unsafe_allow_html=True)
 
-
+# ── Landing-only CSS ──
 st.markdown("""
 <style>
 /* Full-width hero, override block padding */
