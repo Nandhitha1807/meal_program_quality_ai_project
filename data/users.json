@@ -7,19 +7,19 @@
     "school_id": null
   },
   "sch001": {
-    "password_hash": "9c3c99e5cf33f67e98e0d85c52e8c1e2a7f5c89eb6e59abc61e5e7f8c9a5f33e",
+    "password_hash": "39aa740c74fde24a67bd6072a3ceee7f87b0833033a699f9cdf5519236ace0a7",
     "role": "school",
     "full_name": "School 001 Manager",
     "school_id": "SCH001"
   },
   "sch002": {
-    "password_hash": "8f4e5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4",
+    "password_hash": "8dd6823bc165e03f2200a69ea5945639795d347ee18dd903aca769cbae899c98",
     "role": "school",
     "full_name": "School 002 Manager",
     "school_id": "SCH002"
   },
   "sch003": {
-    "password_hash": "7e6d5c4b3a2918f7e6d5c4b3a2918f7e6d5c4b3a2918f7e6d5c4b3a2918f7e6",
+    "password_hash": "b1827af7d7ab4580a39e800ebb38d85c5bd44a0ab1a1c6b3997fd642f90e086a",
     "role": "school",
     "full_name": "School 003 Manager",
     "school_id": "SCH003"
