@@ -127,6 +127,19 @@ section[data-testid="stSidebar"] {
     opacity: 0.65 !important;
 }
 
+
+/* ─── FILE UPLOADER ─── */
+[data-testid="stFileUploader"] {
+    margin-bottom: 2rem !important;
+}
+[data-testid="stFileUploader"] > div {
+    padding-bottom: 1rem !important;
+}
+/* Prevent help icon from overlapping with input */
+[data-testid="stFileUploader"] section {
+    padding-right: 3rem !important;
+}
+
 /* ─── TABS ─── */
 .stTabs [data-baseweb="tab-list"] {
     gap: 3px; background: var(--surf);
