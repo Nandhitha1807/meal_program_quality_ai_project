@@ -1,4 +1,3 @@
-
 """src/styles.py — Shared design tokens for all pages"""
 
 SHARED_CSS = """
@@ -391,5 +390,41 @@ section[data-testid="stSidebar"] {
     font-size:1.35rem; font-weight:700; margin:0 0 .45rem;
 }
 .up-card p { font-size:.86rem; opacity:.58; margin:0 0 1.4rem; line-height:1.6; }
+
+/* ─── LANDING PAGE TEXT ELEMENTS ─── */
+/* These ensure proper text wrapping and alignment on landing page */
+.s-sub {
+    text-align: center !important;
+    opacity: 0.52;
+    font-size: 0.92rem;
+    max-width: 550px !important;
+    margin: 0 auto 3rem !important;
+    line-height: 1.7;
+    display: block;
+    word-wrap: break-word;
+    white-space: normal;
+}
+
+.eyebrow {
+    text-align: center !important;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: #2563eb;
+    margin-bottom: 0.65rem;
+    display: block;
+}
+
+.s-title {
+    font-family: 'Lora', serif !important;
+    text-align: center !important;
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 700;
+    margin: 0 0 0.65rem;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    display: block;
+}
 </style>
 """
