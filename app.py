@@ -91,20 +91,6 @@ section[data-testid="stMain"] > div:first-child { padding-top:0 !important; }
 
 /* ── FEATURES — no bg override ── */
 .feat-grid { padding:4.5rem 0; }
-.eyebrow {
-    text-align:center; font-size:.68rem; font-weight:800;
-    letter-spacing:.13em; text-transform:uppercase;
-    color:#2563eb; margin-bottom:.65rem;
-}
-.s-title {
-    font-family:'Lora',serif !important;
-    text-align:center; font-size:clamp(1.6rem,3vw,2.4rem);
-    font-weight:700; margin:0 0 .65rem; letter-spacing:-.01em; line-height:1.25;
-}
-.s-sub {
-    text-align:center; opacity:.52; font-size:.92rem;
-    max-width:520px; margin:0 auto 3rem; line-height:1.7;
-}
 
 .f-card {
     background:var(--surf); border:1px solid var(--bdr);
@@ -232,7 +218,7 @@ st.markdown("""
 <div class="feat-grid">
   <p class="eyebrow">What We Offer</p>
   <h2 class="s-title">Everything You Need to<br>Monitor Meal Quality</h2>
-  <p class="s-sub" style="max-width:550px;">A complete AI-powered platform for school meal assessment — with clarity and confidence.</p>
+  <p class="s-sub">A complete AI-powered platform for school meal assessment — with clarity and confidence.</p>
 </div>
 </div>
 """, unsafe_allow_html=True)
@@ -270,7 +256,7 @@ st.markdown("""
 <div class="how-sec">
   <p class="eyebrow">Simple Workflow</p>
   <h2 class="s-title">From Data to Insights in 3 Steps</h2>
-  <p class="s-sub" style="max-width:540px;">Upload your meal records and get a full quality report in under a minute.</p>
+  <p class="s-sub">Upload your meal records and get a full quality report in under a minute.</p>
 </div>
 </div>
 """, unsafe_allow_html=True)
