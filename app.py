@@ -62,7 +62,7 @@ section[data-testid="stMain"] > div:first-child { padding-top:0 !important; }
 .hero-title em { font-style:italic; color:#bfdbfe; }
 .hero-sub {
     font-size:1.05rem; color:rgba(255,255,255,.76);
-    max-width:500px; margin:0 auto 2.8rem;
+    max-width:580px; margin:0 auto 2.8rem;
     line-height:1.75; font-weight:400;
 }
 
