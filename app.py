@@ -289,9 +289,7 @@ with inner:
 
 st.markdown("<br><br>", unsafe_allow_html=True)
 
-# ════════════════════════════════════════
 # BOTTOM CTA
-# ════════════════════════════════════════
 st.markdown("""
 <div class="b-cta">
   <div class="b-cta-inner">
