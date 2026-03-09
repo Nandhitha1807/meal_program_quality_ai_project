@@ -2,7 +2,7 @@ class QualityAssessment:
     def __init__(self, df):
         self.df = df
 
-    # 🎯 Calculate Individual Scores
+    #  Calculate Individual Scores
     def calculate_overall_quality(self):
         df = self.df.copy()
 
