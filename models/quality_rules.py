@@ -25,7 +25,7 @@ class QualityAssessment:
             lambda x: 100 if x in [1, True, b'\x01'] else 0
         )
 
-        # 🎯 Weighted Overall Score
+        # Weighted Overall Score
         df['Overall_Quality_Score'] = (
             df['Nutrition_Score'] * 0.30 +
             df['Waste_Score'] * 0.25 +
@@ -36,7 +36,7 @@ class QualityAssessment:
 
         return df
 
-    # 🚨 Generate Alerts
+    #  Generate Alerts
     def generate_alerts(self, df):
         alerts = []
 
