@@ -433,7 +433,7 @@ Developed as an AI-powered school meal quality monitoring solution.
 
 Built with ❤️ using Python, Streamlit, and Plotly.
 
-<!-- ## 🙏 Acknowledgments
+## 🙏 Acknowledgments
 
 - **Streamlit** - Fast web app framework for data science
 - **Plotly** - Interactive visualization library
@@ -442,7 +442,7 @@ Built with ❤️ using Python, Streamlit, and Plotly.
 - **Google Fonts** - Lora and Outfit typography
 - **Anthropic Claude** - Development assistance and code review
 
---- -->
+---
 
 **Made with 🍽️ for better school meal programs**
 
