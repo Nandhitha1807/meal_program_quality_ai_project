@@ -1,9 +1,11 @@
 """
 src/db_saver.py — Save AI Processing Results to MySQL
+Uses pymysql (works on Streamlit Cloud) instead of mysql-connector-python.
 Saves quality_scores and alerts to the database after processing.
 """
 
-import mysql.connector
+import pymysql
+import pymysql.cursors
 import pandas as pd
 from dotenv import load_dotenv
 import os
@@ -12,13 +14,30 @@ load_dotenv()
 
 
 def get_connection():
-    """Create and return a MySQL connection."""
-    return mysql.connector.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER", "root"),
-        password=os.getenv("DB_PASSWORD", ""),
-        database=os.getenv("DB_NAME", "school_meal_db")
-    )
+    """
+    Create and return a MySQL connection using pymysql.
+    Works both locally (.env) and on Streamlit Cloud (st.secrets).
+    """
+    try:
+        # Try Streamlit secrets first — used when deployed on Streamlit Cloud
+        import streamlit as st
+        config = st.secrets
+        return pymysql.connect(
+            host=config["DB_HOST"],
+            user=config["DB_USER"],
+            password=config["DB_PASSWORD"],
+            database=config["DB_NAME"],
+            cursorclass=pymysql.cursors.DictCursor
+        )
+    except Exception:
+        # Fall back to .env — used in local development
+        return pymysql.connect(
+            host=os.getenv("DB_HOST", "localhost"),
+            user=os.getenv("DB_USER", "root"),
+            password=os.getenv("DB_PASSWORD", ""),
+            database=os.getenv("DB_NAME", "school_meal_db"),
+            cursorclass=pymysql.cursors.DictCursor
+        )
 
 
 def save_quality_scores(quality_df: pd.DataFrame, uploaded_by: str = "admin") -> dict:
@@ -69,7 +88,7 @@ def save_quality_scores(quality_df: pd.DataFrame, uploaded_by: str = "admin") ->
             try:
                 cursor.execute(insert_sql, (
                     str(row["School_ID"]),
-                    str(row["Date"])[:10],          # ensure YYYY-MM-DD
+                    str(row["Date"])[:10],
                     round(float(row["Overall_Quality_Score"]), 4),
                     round(float(row["Nutrition_Score"]), 4),
                     round(float(row["Waste_Score"]), 4),
@@ -79,7 +98,7 @@ def save_quality_scores(quality_df: pd.DataFrame, uploaded_by: str = "admin") ->
                     uploaded_by,
                 ))
                 result["saved"] += 1
-            except Exception as row_err:
+            except Exception:
                 result["errors"] += 1
 
         conn.commit()
@@ -142,7 +161,7 @@ def save_alerts(alerts_df: pd.DataFrame, uploaded_by: str = "admin") -> dict:
                     uploaded_by,
                 ))
                 result["saved"] += 1
-            except Exception as row_err:
+            except Exception:
                 result["errors"] += 1
 
         conn.commit()

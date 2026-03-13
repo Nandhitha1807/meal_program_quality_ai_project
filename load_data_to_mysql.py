@@ -27,7 +27,7 @@ print(f"✅ Loaded {len(df)} records from CSV")
 # Step 3: Connect to MySQL
 print("🔌 Connecting to MySQL...")
 try:
-    conn = mysql.connector.connect(
+    conn = pymysql.connect(
         host=os.getenv("DB_HOST"),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),

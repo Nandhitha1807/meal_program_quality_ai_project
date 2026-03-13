@@ -10,7 +10,8 @@ sys.path.append(str(Path(__file__).parent.parent))
 from src.auth import is_logged_in, get_current_user, logout
 from src.styles import SHARED_CSS
 
-import mysql.connector
+import pymysql
+import pymysql.cursors
 from dotenv import load_dotenv
 import os
 
@@ -60,7 +61,7 @@ st.markdown("""
 
 # ── DB CONNECTION HELPER ──
 def get_connection():
-    return mysql.connector.connect(
+    return pymysql.connect(
         host=os.getenv("DB_HOST", "localhost"),
         user=os.getenv("DB_USER", "root"),
         password=os.getenv("DB_PASSWORD", ""),
