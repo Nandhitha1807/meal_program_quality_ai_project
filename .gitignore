@@ -17,3 +17,6 @@ __pycache__/
 # System files
 .DS_Store
 Thumbs.db
+
+create_new_tables.sql
+create_aiven_tables.py
