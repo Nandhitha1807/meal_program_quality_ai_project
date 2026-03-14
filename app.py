@@ -250,7 +250,7 @@ st.markdown("<br><br>", unsafe_allow_html=True)
 
 # ════════════════════════════════════════
 # HOW IT WORKS
-# ════════════════════════════════════════
+
 st.markdown("""
 <div class="content-wrap">
 <div class="how-sec">
