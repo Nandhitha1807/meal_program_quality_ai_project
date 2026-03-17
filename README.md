@@ -15,7 +15,6 @@ An intelligent web application for monitoring and assessing school meal program 
 - 💰 **Zero Hardware Cost** - Runs on any laptop, no cloud infrastructure required
 
 ## 🎯 Core Features
-
 ### Multi-Page Architecture
 - **Landing Page** - Professional hero section with feature showcase
 - **Authentication System** - Secure login with session management
