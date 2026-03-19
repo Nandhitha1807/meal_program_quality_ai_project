@@ -2,17 +2,6 @@
 
 An intelligent web application for monitoring and assessing school meal program quality using explainable rule-based AI, featuring professional UI/UX design and comprehensive analytics.
 
-## ✨ Key Highlights
-
-- 🤖 **100% Explainable AI** - Rule-based quality scoring system (not a black box)
-- 📊 **5-Dimensional Assessment** - Nutrition, Waste, Hygiene, Taste, Menu Compliance
-- 🎨 **Professional UI/UX** - Theme-adaptive design that works in both light and dark mode
-- 🔐 **Secure Authentication** - SHA256 password hashing with role-based access
-- 📈 **Interactive Analytics** - Real-time Plotly visualizations with downloadable reports
-- ⚡ **Async Processing** - Background threading keeps server responsive during AI processing
-- 🗄️ **Full MySQL Integration** - AI results saved permanently to cloud database after every run
-- 🌐 **Live Deployment** - Fully deployed on Streamlit Cloud with cloud MySQL
-- 💰 **Zero Hardware Cost** - Runs on any laptop, no cloud infrastructure required
 
 ## 🎯 Core Features
 
