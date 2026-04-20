@@ -122,19 +122,19 @@ def init_user_db():
             "school_id": None  # Admin can see all schools
         },
         "sch001": {
-            "password_hash": hash_password("sch001pass"),
+            "password_hash": hash_password("school001"),
             "role": "school",
             "full_name": "School 001 Manager",
             "school_id": "SCH001"  # Can only see SCH001
         },
         "sch002": {
-            "password_hash": hash_password("sch002pass"),
+            "password_hash": hash_password("school002"),
             "role": "school",
             "full_name": "School 002 Manager",
             "school_id": "SCH002"  # Can only see SCH002
         },
         "sch003": {
-            "password_hash": hash_password("sch003pass"),
+            "password_hash": hash_password("school003"),
             "role": "school",
             "full_name": "School 003 Manager",
             "school_id": "SCH003"  # Can only see SCH003
